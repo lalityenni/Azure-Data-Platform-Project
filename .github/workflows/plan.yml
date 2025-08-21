@@ -1,76 +1,76 @@
+
 name: Terraform CI (plan-only)
 
 on:
   push:
-    branches:
-      - dev
-      - main
+    branches: [ "dev", "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 permissions:
+  id-token: write     # needed for Azure OIDC (when we add it)
   contents: read
+
+# Read Azure IDs from GitHub Variables (we'll add these later).
+env:
+  AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    # run all commands inside the module folder
-    defaults:
-      run:
-        shell: bash
-        working-directory: infra/m1-network
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # simple debug so we see where we are
-      - name: Debug - show files
-        run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          pwd
-          ls -la
+      # If no *.tf files yet, skip the heavy steps (prevents red checks on early PRs)
+      - name: No Terraform files yet – skipping checks
+        if: ${{ hashFiles('**/*.tf') == '' }}
+        run: echo "No Terraform files found, skipping fmt/validate/tflint/checkov/plan."
 
-      # if the module has no .tf yet, skip tools
-      - name: No Terraform files yet – skipping
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') == '' }}
-        run: echo "No .tf files under infra/m1-network; skipping."
+      # (Optional) Azure OIDC login – only if IDs are present AND we have *.tf
+      - name: Azure login (OIDC)
+        if: ${{ hashFiles('**/*.tf') != '' && env.AZURE_CLIENT_ID != '' }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
+        if: ${{ hashFiles('**/*.tf') != '' }}
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform init (no backend)
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
-        run: terraform init -backend=false
-
       - name: Terraform fmt
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
+        if: ${{ hashFiles('**/*.tf') != '' }}
         run: terraform fmt -check
 
       - name: Terraform validate
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
+        if: ${{ hashFiles('**/*.tf') != '' }}
         run: terraform validate
 
       - name: Setup TFLint
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
+        if: ${{ hashFiles('**/*.tf') != '' }}
         uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: latest
 
       - name: Run TFLint
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
+        if: ${{ hashFiles('**/*.tf') != '' }}
         run: tflint --recursive
 
       - name: Run Checkov
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
+        if: ${{ hashFiles('**/*.tf') != '' }}
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: .
           quiet: true
 
-    
+      - name: Terraform plan (plan-only, no backend)
+        if: ${{ hashFiles('**/*.tf') != '' }}
+        run: terraform plan -input=false -lock=false -no-color -out=tfplan -backend=false
+
