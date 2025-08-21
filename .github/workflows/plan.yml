@@ -72,5 +72,5 @@ jobs:
 
       - name: Terraform plan (plan-only, no backend)
         if: ${{ hashFiles('**/*.tf') != '' }}
-        run: terraform plan -input=false -lock=false -no-color -out=tfplan -backend=false
+        run: terraform plan -input=false -lock=false -no-color -out=tfplan
 
