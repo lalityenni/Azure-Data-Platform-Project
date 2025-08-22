@@ -2,7 +2,7 @@ name: Terraform CI (plan-only)
 
 on:
   push:
-    branches: [ dev" ]
+    branches: [ "dev" ]
  
 permissions:
   contents: read
