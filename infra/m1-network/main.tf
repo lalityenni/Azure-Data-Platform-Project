@@ -11,14 +11,10 @@ terraform {
 
 provider "azurerm" {
   features {}
+  # CI runs fmt/validate only (no plan). Run plan locally with: az login
 }
 
-
 resource "azurerm_resource_group" "rg" {
-<<<<<<< HEAD
   name     = "rg-adp-dev-eus"
-=======
-  name = "rg-adp-dev-eus"
->>>>>>> d4a165e (chore: add terraform.required_version and provider versions (tflint fix))
-  location = "East US"
+  location = "eastus"
 }
