@@ -73,6 +73,4 @@ jobs:
           directory: .
           quiet: true
 
-      - name: Terraform plan (offline)
-        if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
-        run: terraform plan -refresh=false -input=false -lock=false -no-color -out=tfplan
+    
