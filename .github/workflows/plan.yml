@@ -2,41 +2,41 @@ name: Terraform CI (plan-only)
 
 on:
   push:
-    branches: [ "dev", "main" ]
+    branches:
+      - dev
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 permissions:
   contents: read
-
-env:
-  AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-  AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    # Run all shell steps inside the module folder
+    # run all commands inside the module folder
     defaults:
       run:
+        shell: bash
         working-directory: infra/m1-network
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # simple debug so we see where we are
       - name: Debug - show files
         run: |
+          echo "Workspace: $GITHUB_WORKSPACE"
           pwd
           ls -la
-          echo "---- infra/m1-network ----"
-          ls -la infra/m1-network
-      # Skip when the module has no *.tf yet
-      - name: No Terraform files yet – skipping checks
+
+      # if the module has no .tf yet, skip tools
+      - name: No Terraform files yet – skipping
         if: ${{ hashFiles('infra/m1-network/**/*.tf') == '' }}
-        run: echo "No Terraform files in infra/m1-network; skipping."
+        run: echo "No .tf files under infra/m1-network; skipping."
 
       - name: Setup Terraform
         if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
@@ -47,8 +47,6 @@ jobs:
       - name: Terraform init (no backend)
         if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
         run: terraform init -backend=false
-
-         
 
       - name: Terraform fmt
         if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
@@ -72,7 +70,7 @@ jobs:
         if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: infra/m1-network
+          directory: .
           quiet: true
 
       - name: Terraform plan (offline)
