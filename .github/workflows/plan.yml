@@ -9,7 +9,6 @@ on:
 permissions:
   contents: read
 
-# (Kept for later OIDC wiring; harmless if empty)
 env:
   AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
   AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
@@ -31,7 +30,7 @@ jobs:
       # Skip when the module has no *.tf yet
       - name: No Terraform files yet – skipping checks
         if: ${{ hashFiles('infra/m1-network/**/*.tf') == '' }}
-        run: echo "No Terraform files found in infra/m1-network; skipping fmt/validate/tflint/checkov/plan."
+        run: echo "No Terraform files in infra/m1-network; skipping."
 
       - name: Setup Terraform
         if: ${{ hashFiles('infra/m1-network/**/*.tf') != '' }}
