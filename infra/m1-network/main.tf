@@ -15,6 +15,6 @@ provider "azurerm" {
 
 
 resource "azurerm_resource_group" "rg" {
-  name = "rg-adp-dev-eus"
+  name     = "rg-adp-dev-eus"
   location = "East US"
 }
