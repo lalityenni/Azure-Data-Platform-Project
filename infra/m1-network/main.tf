@@ -82,3 +82,11 @@ resource "azurerm_subnet_network_security_group_association" "hub_nsg_assoc" {
   subnet_id                 = azurerm_subnet.hub_subnet.id
   network_security_group_id = azurerm_network_security_group.hub_nsg.id
 }
+
+# M1.4 — Subnet for Private Endpoints
+resource "azurerm_subnet" "data_pe" {
+  name                                      = "snet-adp-dev-eus-data-pe"
+  resource_group_name                       = azurerm_resource_group.rg.name
+  virtual_network_name                      = azurerm_virtual_network.hub.name
+  address_prefixes                          = ["10.0.2.0/24"]
+}
