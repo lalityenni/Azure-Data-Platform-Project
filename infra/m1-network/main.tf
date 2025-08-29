@@ -25,8 +25,8 @@ resource "azurerm_virtual_network" "hub" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
-tags = {
-  env = "dev"
-  tier = "network"
-}
+  tags = {
+    env  = "dev"
+    tier = "network"
+  }
 }
