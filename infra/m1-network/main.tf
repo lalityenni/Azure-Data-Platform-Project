@@ -85,8 +85,30 @@ resource "azurerm_subnet_network_security_group_association" "hub_nsg_assoc" {
 
 # M1.4 — Subnet for Private Endpoints
 resource "azurerm_subnet" "data_pe" {
-  name                                      = "snet-adp-dev-eus-data-pe"
-  resource_group_name                       = azurerm_resource_group.rg.name
-  virtual_network_name                      = azurerm_virtual_network.hub.name
-  address_prefixes                          = ["10.0.2.0/24"]
+  name                 = "snet-adp-dev-eus-data-pe"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.0.2.0/24"]
+}
+
+resource "azurerm_storage_account" "landing" {
+  name                     = "stladpdeveus001" # must be globally unique
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+
+  is_hns_enabled = true
+
+  public_network_access_enabled = false
+
+  min_tls_version = "TLS1_2"
+
+
+  tags = {
+    env  = "dev"
+    tier = "storage"
+  }
+
 }
