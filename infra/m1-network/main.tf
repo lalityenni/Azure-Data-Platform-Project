@@ -101,8 +101,9 @@ resource "azurerm_storage_account" "landing" {
 
   is_hns_enabled = true
 
+  # Lock down public exposure — we’ll use Private Endpoints next
   public_network_access_enabled = false
-
+  # Baseline security hygiene
   min_tls_version = "TLS1_2"
 
 
@@ -110,5 +111,19 @@ resource "azurerm_storage_account" "landing" {
     env  = "dev"
     tier = "storage"
   }
+
+}
+
+resource "azurerm_storage_container" "raw" {
+  name                  = "raw"
+  storage_account_name  = azurerm_storage_account.landing.name # fine even if public access is disabled at account level
+  container_access_type = "private"
+
+}
+
+resource "azurerm_storage_container" "staging" {
+  name                  = "staging"
+  storage_account_name  = azurerm_storage_account.landing.name
+  container_access_type = "private"
 
 }
