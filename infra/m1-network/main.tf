@@ -208,3 +208,19 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dfs_p1_dns_vnet_link" 
   virtual_network_id    = azurerm_virtual_network.hub.id
   registration_enabled  = false
 }
+# M2.5 — RBAC for your user (pulled from current az login)
+data "azurerm_client_config" "current" {}
+
+# read blobs/lists (Safe Default)
+resource "azurerm_role_assignment" "storage_blob_data_reader" {
+  scope                = azurerm_storage_account.landing.id
+  role_definition_name = "Storage Blob Data Reader"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# write blobs (Safe Default)
+resource "azurerm_role_assignment" "storage_blob_data_contributor" {
+  scope                = azurerm_storage_account.landing.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
