@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "rg" {
   name     = "rg-adp-dev-eus"
   location = "eastus"
 }
-
+# M1.1 - Create a hub VNet
 resource "azurerm_virtual_network" "hub" {
   name                = "vnet-adp-dev-eus"
   address_space       = ["10.0.0.0/16"]
@@ -39,7 +39,7 @@ resource "azurerm_subnet" "hub_subnet" {
   address_prefixes     = ["10.0.1.0/24"]                  # leaves 10.0.0.x free
 }
 
-# M1.3 — (NSG) for the hub VNet
+# M1.3 — (NSG) for the hub  subnet
 resource "azurerm_network_security_group" "hub_nsg" {
   name                = "nsg-adp-dev-eus-hub"
   location            = azurerm_resource_group.rg.location
@@ -91,6 +91,7 @@ resource "azurerm_subnet" "data_pe" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
+# M2.1 — Storage account for landing (ADLS Gen2)
 resource "azurerm_storage_account" "landing" {
   name                     = "stladpdeveus001" # must be globally unique
   resource_group_name      = azurerm_resource_group.rg.name
@@ -113,7 +114,7 @@ resource "azurerm_storage_account" "landing" {
   }
 
 }
-
+# M2.1b — Containers for landing zones
 resource "azurerm_storage_container" "raw" {
   name                  = "raw"
   storage_account_name  = azurerm_storage_account.landing.name # fine even if public access is disabled at account level
@@ -127,7 +128,7 @@ resource "azurerm_storage_container" "staging" {
   container_access_type = "private"
 
 }
-
+# M2.2 — Private Endpoint for Storage (blob) in data_pe subnet
 resource "azurerm_private_endpoint" "st_blob_pe" {
   name                = "pep-adp-dev-eus-st-blob"
   location            = azurerm_resource_group.rg.location
@@ -140,10 +141,70 @@ resource "azurerm_private_endpoint" "st_blob_pe" {
     is_manual_connection           = false
     subresource_names              = ["blob"] # target the blob endpoint of the storage account
   }
+  private_dns_zone_group {
+    name                 = "pdnszg-st-blob"
+    private_dns_zone_ids = [azurerm_private_dns_zone.blob_p1_dns.id]
+  }
 
   tags = {
     env  = "dev"
     tier = "network"
   }
 
+}
+# M2.3 — Private DNS for Storage (blob
+
+# 1) DNS zone for blob private endpoint
+resource "azurerm_private_dns_zone" "blob_p1_dns" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = azurerm_resource_group.rg.name
+
+}
+
+# 2) Link the zone to your hub VNet (so clients in the VNet resolve to the PE IP)
+resource "azurerm_private_dns_zone_virtual_network_link" "blob_p1_dns_vnet_link" {
+  name                  = "pdnslink-adp-dev-eus-hub"
+  resource_group_name   = azurerm_resource_group.rg.name
+  private_dns_zone_name = azurerm_private_dns_zone.blob_p1_dns.name
+  virtual_network_id    = azurerm_virtual_network.hub.id
+  registration_enabled  = false
+}
+
+
+# M2.4 - Private Endpoint for Storage (dfs) in data_pe subnet
+resource "azurerm_private_endpoint" "st_dfs_pe" {
+  name                = "pep-adp-dev-eus-st-dfs"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  subnet_id           = azurerm_subnet.data_pe.id # use the data_pe subnet  
+  private_service_connection {
+    name                           = "psc-st-dfs"
+    private_connection_resource_id = azurerm_storage_account.landing.id
+    is_manual_connection           = false
+    subresource_names              = ["dfs"] # target the dfs endpoint of the storage account
+  }
+  # Bind this PE to the DFS Private DNS zone (created below)
+  private_dns_zone_group {
+    name                 = "pdnszg-st-dfs"
+    private_dns_zone_ids = [azurerm_private_dns_zone.dfs_p1_dns.id]
+  }
+  tags = {
+    env  = "dev"
+    tier = "network"
+  }
+}
+
+# M2.5 — Private DNS for DFS endpoint
+
+resource "azurerm_private_dns_zone" "dfs_p1_dns" {
+  name                = "privatelink.dfs.core.windows.net"
+  resource_group_name = azurerm_resource_group.rg.name
+
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "dfs_p1_dns_vnet_link" {
+  name                  = "pdnslink-adp-dev-eus-hub-dfs"
+  resource_group_name   = azurerm_resource_group.rg.name
+  private_dns_zone_name = azurerm_private_dns_zone.dfs_p1_dns.name
+  virtual_network_id    = azurerm_virtual_network.hub.id
+  registration_enabled  = false
 }
