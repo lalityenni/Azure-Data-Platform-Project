@@ -15,8 +15,8 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-adp-dev-eus"
-  location = "eastus"
+  name     = var.rg_name
+  location = var.location
 }
 # M1.1 - Create a hub VNet
 resource "azurerm_virtual_network" "hub" {
