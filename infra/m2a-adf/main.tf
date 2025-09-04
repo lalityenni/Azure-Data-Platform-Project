@@ -16,7 +16,7 @@ provider "azurerm" {
 # M2A — Azure Data Factory 
 resource "azurerm_data_factory" "adf" {
   name                = var.adf_name
-  location            = var.location          # <-- literal; no data source
+  location            = var.location # <-- literal; no data source
   resource_group_name = var.rg_name  # <-- literal; no data source
 
   identity {
