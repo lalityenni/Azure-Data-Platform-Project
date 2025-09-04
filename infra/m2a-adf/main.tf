@@ -15,9 +15,9 @@ provider "azurerm" {
 
 # M2A — Azure Data Factory 
 resource "azurerm_data_factory" "adf" {
-  name                = "adf-adp-dev-eus"
-  location            = "eastus"           # <-- literal; no data source
-  resource_group_name = "rg-adp-dev-eus"   # <-- literal; no data source
+  name                = var.adf_name
+  location            = var.location          # <-- literal; no data source
+  resource_group_name = var.rg_name  # <-- literal; no data source
 
   identity {
     type = "SystemAssigned"
