@@ -1,0 +1,16 @@
+{
+  "name": "LS_Blob_MI",
+  "properties": {
+    "type": "AzureBlobStorage",
+    "description": "Blob via Managed Identity (design-only)",
+    "annotations": ["mi-auth", "design-only"],
+    "parameters": {
+      "accountUrl": {
+        "type": "String",
+        "defaultValue": "https://stladpdeveus001.blob.core.windows.net/"
+      }
+    },
+    "authenticationType": "ManagedIdentity",
+    "typeProperties": {}
+  }
+}
