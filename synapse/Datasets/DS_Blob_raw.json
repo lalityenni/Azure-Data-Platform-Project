@@ -1,0 +1,14 @@
+{
+  "name": "DS_Blob_Raw",
+  "properties": {
+    "type": "AzureBlob",
+    "linkedServiceName": {
+      "referenceName": "LS_Blob_MI",
+      "type": "LinkedServiceReference"
+    },
+    "typeProperties": {
+      "container": "raw"
+    },
+    "annotations": ["design-only"]
+  }
+}
