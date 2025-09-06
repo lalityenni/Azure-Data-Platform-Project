@@ -1,0 +1,18 @@
+{
+  "name": "PL_Copy_Raw_to_Staging",
+  "properties": {
+    "annotations": ["design-only"],
+    "activities": [
+      {
+        "name": "CopyRawToStaging",
+        "type": "Copy",
+        "typeProperties": {
+          "source": { "type": "BinarySource" },
+          "sink":   { "type": "BinarySink" }
+        },
+        "inputs":  [{ "referenceName": "DS_Blob_Raw",     "type": "DatasetReference" }],
+        "outputs": [{ "referenceName": "DS_Blob_Staging", "type": "DatasetReference" }]
+      }
+    ]
+  }
+}
