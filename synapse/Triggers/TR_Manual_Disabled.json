@@ -1,0 +1,14 @@
+{
+  "name": "TR_Manual_Disabled",
+  "properties": {
+    "type": "Manual",
+    "annotations": ["design-only"],
+    "runtimeState": "Stopped",
+    "pipelines": [
+      {
+        "pipelineReference": { "referenceName": "PL_Copy_Raw_to_Staging", "type": "PipelineReference" },
+        "parameters": {}
+      }
+    ]
+  }
+}
