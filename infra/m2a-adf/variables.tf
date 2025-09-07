@@ -10,3 +10,14 @@ variable "adf_name" {
   type    = string
   default = "adf-adp-dev-eus"
 }
+
+variable "subscription_id" {
+  description = "The subscription ID where resources will be deployed"
+  type        = string 
+}
+
+variable "storage_account_name" {
+  description = "The name of the storage account to be used by ADF"
+  type        = string
+  default     = "stadpadpdeveus"
+}
