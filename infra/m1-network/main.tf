@@ -224,3 +224,15 @@ resource "azurerm_role_assignment" "storage_blob_data_contributor" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = data.azurerm_client_config.current.object_id
 }
+
+
+# M4.0 - Curated Container (ADLS Gen2)
+
+resource "azurerm_storage_container" "Curated" {
+  name = "curated"
+  storage_account_name = azurerm_storage_account.landing.name
+  container_access_type = "private"
+  metadata = {
+    zone = "curated"
+  }  
+}
