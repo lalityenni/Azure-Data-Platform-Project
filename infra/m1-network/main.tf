@@ -225,6 +225,11 @@ resource "azurerm_role_assignment" "storage_blob_data_contributor" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+#In Azure, RBAC permissions are always a combination of principal, role, and scope. 
+#In this case, Terraform is assigning the built-in Storage Blob Data Reader role to the currently logged-in identity at the scope of a storage account. 
+#That means the principal can list containers and read blob contents in that storage account, but not write or delete.”
+
+
 
 # M4.0 - Curated Container (ADLS Gen2)
 
