@@ -13,7 +13,7 @@ variable "adf_name" {
 
 variable "subscription_id" {
   description = "The subscription ID where resources will be deployed"
-  type        = string 
+  type        = string
 }
 
 variable "storage_account_name" {
