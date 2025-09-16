@@ -1,0 +1,14 @@
+{
+    "name": "DS_ADLS_Curated",
+    "properties": {
+        "type": "AzureBlobFS",
+        "linkedServiceName": {
+            "referenceName": "LS_ADLS_MI",
+            "type": "LinkedServiceReference"
+        },
+        "typeProperties": {
+            "fileSystem": "curated"
+        },
+        "annotations": ["mi-auth"]
+}
+}
